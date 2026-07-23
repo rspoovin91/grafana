@@ -1,0 +1,486 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "alb-observability-dashboard",
+    "title": "ALB Observability Dashboard",
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "templating": {
+      "list": [
+        {
+          "name": "loadBalancer",
+          "type": "query",
+          "datasource": "CloudWatch",
+          "refresh": 1,
+          "hide": 0,
+          "label": "Load Balancer",
+          "options": [],
+          "query": "SELECT DISTINCT LoadBalancer FROM AWS/ApplicationELB WHERE metric_name = 'RequestCount' AND region = '${__sys.google.region}'",
+          "refreshOnLoad": true,
+          "multi": false,
+          "includeAll": true,
+          "allValue": ".+",
+          "sort": 1,
+          "default": ".+",
+          "refreshOnLoad": true
+        },
+        {
+          "name": "targetGroup",
+          "type": "query",
+          "datasource": "CloudWatch",
+          "refresh": 1,
+          "hide": 0,
+          "label": "Target Group",
+          "options": [],
+          "query": "SELECT DISTINCT TargetGroup FROM AWS/ApplicationELB WHERE metric_name = 'RequestCount' AND LoadBalancer = '${loadBalancer}' AND region = '${__sys.google.region}'",
+          "refreshOnLoad": true,
+          "multi": false,
+          "includeAll": true,
+          "allValue": ".+",
+          "sort": 1,
+          "default": ".+"
+        }
+      ]
+    },
+    "panels": [
+      {
+        "type": "timeseries",
+        "title": "Request Count (Total)",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "datasource": "CloudWatch",
+        "targets": [
+          {
+            "refId": "A",
+            "region": "${__sys.google.region}",
+            "metricName": "RequestCount",
+            "namespace": "AWS/ApplicationELB",
+            "dimensions": [
+              { "name": "LoadBalancer", "value": "${loadBalancer}" },
+              { "name": "TargetGroup", "value": "${targetGroup}" }
+            ],
+            "statistic": "Sum",
+            "period": "",
+            "interval": "",
+            "expressions": [],
+            "legendFormat": "{{TargetGroup}}",
+            "rawSql": "",
+            "hide": false,
+            "intervalFactor": 1,
+            "maxDataPoints": 43200,
+            "timeout": null
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "custom": {}
+          },
+          "overrides": []
+        },
+        "options": {
+          "legend": { "displayMode": "list", "placement": "bottom" },
+          "tooltip": { "mode": "single" },
+          "drawStyle": "line",
+          "lineInterpolation": "linear",
+          "lineWidth": 2,
+          "pointSize": 5,
+          "showPoints": "auto",
+          "fillOpacity": 10,
+          "gradientMode": "none",
+          "spanNulls": false,
+          "stacking": { "mode": "none", "group": "A" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 0 }
+            ]
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Request Rate (req/sec)",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "datasource": "CloudWatch",
+        "targets": [
+          {
+            "refId": "A",
+            "region": "${__sys.google.region}",
+            "metricName": "RequestCount",
+            "namespace": "AWS/ApplicationELB",
+            "dimensions": [
+              { "name": "LoadBalancer", "value": "${loadBalancer}" },
+              { "name": "TargetGroup", "value": "${targetGroup}" }
+            ],
+            "statistic": "Sum",
+            "period": "",
+            "interval": "",
+            "expressions": [
+              {
+                "id": "B",
+                "expression": "PERIOD_SECONDS(A, $interval)",
+                "label": "Rate per sec",
+                "hide": false
+              }
+            ],
+            "legendFormat": "{{TargetGroup}}",
+            "rawSql": "",
+            "hide": false,
+            "intervalFactor": 1,
+            "maxDataPoints": 43200,
+            "timeout": null
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "decimals": 2,
+            "custom": {}
+          },
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": { "values": false, "values": false, "calcs": ["lastNotNull"], "fields": "" },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        }
+      },
+      {
+        "type": "bargauge",
+        "title": "Target Response Code Distribution",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "datasource": "CloudWatch",
+        "targets": [
+          {
+            "refId": "A",
+            "region": "${__sys.google.region}",
+            "metricName": "HTTPCode_Target_2XX_Count",
+            "namespace": "AWS/ApplicationELB",
+            "dimensions": [
+              { "name": "LoadBalancer", "value": "${loadBalancer}" },
+              { "name": "TargetGroup", "value": "${targetGroup}" }
+            ],
+            "statistic": "Sum",
+            "period": "",
+            "interval": "",
+            "expressions": [],
+            "legendFormat": "2XX",
+            "rawSql": "",
+            "hide": false,
+            "intervalFactor": 1,
+            "maxDataPoints": 43200,
+            "timeout": null
+          },
+          {
+            "refId": "B",
+            "region": "${__sys.google.region}",
+            "metricName": "HTTPCode": "HTTPCode_Target_4XX_Count",
+            "namespace": "AWS/ApplicationELB",
+            "dimensions": [
+              { "name": "LoadBalancer", "value": "${loadBalancer}" },
+              { "name": "TargetGroup", "value": "${targetGroup}" }
+            ],
+            "statistic": "Sum",
+            "period": "",
+            "interval": "",
+            "expressions": [],
+            "legendFormat": "4XX",
+            "rawSql": "",
+            "hide": false,
+            "intervalFactor": 1,
+            "maxDataPoints": 43200,
+            "timeout": null
+          },
+          {
+            "refId": "C",
+            "region": "${__sys.google.region}",
+            "metricName": "HTTPCode_Target_5XX_Count",
+            "namespace": "AWS/ApplicationELB",
+            "dimensions": [
+              { "name": "LoadBalancer", "value": "${loadBalancer}" },
+              { "name": "TargetGroup", "value": "${targetGroup}" }
+            ],
+            "statistic": "Sum",
+            "period": "",
+            "interval": "",
+            "expressions": [],
+            "legendFormat": "5XX",
+            "rawSql": "",
+            "hide": false,
+            "intervalFactor": 1,
+            "maxDataPoints": 43200,
+            "timeout": null
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "custom": {}
+          },
+          "overrides": []
+        },
+        "options": {
+          "orientation": "horizontal",
+          "showLabels": true,
+          "showUnfilled": true,
+          "orientationMode": "auto",
+          "displayMode": "gradient",
+          "justifyMode": "auto",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 50, "color": "orange" },
+              { "value": 80, "color": "red" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "timeseries",
+        "title": "Target Response Time (ms)",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "datasource": "CloudWatch",
+        "targets": [
+          {
+            "refId": "A",
+            "region": "${__sys.google.region}",
+            "metricName": "TargetResponseTime",
+            "namespace": "AWS/ApplicationELB",
+            "dimensions": [
+              { "name": "LoadBalancer", "value": "${loadBalancer}" },
+              { "name": "TargetGroup", "value": "${targetGroup}" }
+            ],
+            "statistic": "Average",
+            "period": "",
+            "interval": "",
+            "expressions": [],
+            "legendFormat": "{{TargetGroup}}",
+            "rawSql": "",
+            "hide": false,
+            "intervalFactor": 1intervalFactor": 1,
+            "maxDataPoints": 43200,
+            "timeout": null
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 2,
+            "custom": {}
+          },
+          "overrides": []
+        },
+        "options": {
+          "legend": { "displayMode": "list", "placement": "bottom" },
+          "tooltip": { "mode": "single" },
+          "drawStyle": "line",
+          "lineInterpolation": "linear",
+          "lineWidth": 2,
+          "pointSize": 5,
+          "showPoints": "auto",
+          "fillOpacity": 10,
+          "gradientMode": "none",
+          "spanNulls": false,
+          "stacking": { "mode": "none", "group": "A" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 100 },
+              { "color": "red", "value": 500 }
+            ]
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Healthy Host Count",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 6 },
+        "datasource": "CloudWatch",
+        "targets": [
+          {
+            "refId": "A",
+            "region": "${__sys.google.region}",
+            "metricName": "HealthyHostCount",
+            "namespace": "AWS/ApplicationELB",
+            "dimensions": [
+              { "name": "LoadBalancer", "value": "${loadBalancer}" },
+              { "name": "TargetGroup", "value": "${targetGroup}" }
+            ],
+            "statistic": "Average",
+            "period": "",
+            "interval": "",
+            "expressions": [],
+            "legendFormat": "{{TargetGroup}}",
+            "rawSql": "",
+            "hide": false,
+            "intervalFactor": 1,
+            "maxDataPoints": 43200,
+            "timeout": null
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "decimals": 0,
+            "custom": {}
+          },
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": { "values": false, "values": false, "calcs": ["lastNotNull"], "fields": "" },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        }
+      },
+      {
+        "type": "gauge",
+        "title": "Healthy Host %",
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 6 },
+        "datasource": "CloudWatch",
+        "targets": [
+          {
+            "refId": "A",
+            "region": "${__sys.google.region}",
+            "metricName": "HealthyHostCount",
+            "namespace": "AWS/ApplicationELB",
+            "dimensions": [
+              { "name": "LoadBalancer", "value": "${loadBalancer}" },
+              { "name": "TargetGroup", "value": "${targetGroup}" }
+            ],
+            "statistic": "Average",
+            "period": "",
+            "interval": "",
+            "expressions": [
+              {
+                "id": "B",
+                "expression": "DIVIDE(A, ${TargetGroupDesiredCount}) * 100",
+                "label": "Healthy %",
+                "hide": false
+              }
+            ],
+            "legendFormat": "{{TargetGroup}}",
+            "rawSql": "",
+            "hide": false,
+            "intervalFactor": 1,
+            "maxDataPoints": 43200,
+            "timeout": null
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1,
+            "custom": {}
+          },
+          "overrides": []
+        },
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true,
+          "orientation": "auto",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 80, "color": "orange" },
+              { "value": 95, "color": "red" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "table",
+        "title": "Request Count per Target (Instance/IP)",
+        "gridPos": { "x": 0, "y": 22, "w": 24, "h": 8 },
+        "datasource": "CloudWatch",
+        "targets": [
+          {
+            "refId": "A",
+            "region": "${__sys.google.region}",
+            "metricName": "RequestCount",
+            "namespace": "AWS/ApplicationELB",
+            "dimensions": [
+              { "name": "LoadBalancer", "value": "${loadBalancer}" },
+              { "name": "TargetGroup", "value": "${targetGroup}" },
+              { "name": "Target", "value": ".+" }
+            ],
+            "statistic": "Sum",
+            "period": "",
+            "interval": "",
+            "expressions": [],
+            "legendFormat": "{{Target}}",
+            "rawSql": "",
+            "hide": false,
+            "intervalFactor": 1,
+            "maxDataPoints": 43200,
+            "timeout": null
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "custom": {}
+          },
+          "overrides": []
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "displayName": "Target",
+              "desc": false
+            }
+          ]
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "type": "query",
+          "name": "loadBalancer",
+          "datasource": "CloudWatch",
+          "refresh": 1,
+          "query": "SELECT DISTINCT LoadBalancer FROM AWS/ApplicationELB WHERE metric_name = 'RequestCount' AND region = '${__sys.google.region}'",
+          "includeAll": true,
+          "multi": false,
+          "allValue": ".+",
+          "sort": 1,
+          "default": ".+"
+        },
+        {
+          "type": "query",
+          "name": "targetGroup",
+          "datasource": "CloudWatch",
+          "refresh": 1,
+          "query": "SELECT DISTINCT TargetGroup FROM AWS/ApplicationELB WHERE metric_name = 'RequestCount' AND LoadBalancer = '${loadBalancer}' AND region = '${__sys.google.region}'",
+          "includeAll": true,
+          "multi": false,
+          "allValue": ".+",
+          "sort": 1,
+          "default": ".+"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": []
+  },
+  "overwrite": true
+}
