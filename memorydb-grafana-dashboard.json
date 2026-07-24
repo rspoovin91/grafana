@@ -1,0 +1,202 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "memorydb-monitoring",
+    "title": "AWS MemoryDB Monitoring Dashboard",
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "5s",
+    "templating": {
+      "list": [
+        {
+          "type": "datasource",
+          "name": "DS_CLOUDWATCH",
+          "label": "CloudWatch Datasource",
+          "default": "${DS_CLOUDWATCH}",
+          "hide": 2,
+          "refresh": 1,
+          "options": []
+        },
+        {
+          "type": "textbox",
+          "name": "CacheClusterId",
+          "label": "Cache Cluster ID",
+          "default": "",
+          "placeholder": "e.g., my-memorydb-cluster",
+          "refresh": 1
+        }
+      ]
+    },
+    "panels": [
+      {
+        "type": "timeseries",
+        "title": "CPU Utilization (%)",
+        "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 },
+        "datasource": "${DS_CLOUDWATCH}",
+        "targets": [
+          {
+            "refId": "A",
+            "metricName": "CPUUtilization",
+            "namespace": "AWS/MemoryDB",
+            "statistics": ["Average"],
+            "dimensions": [
+              { "name": "CacheClusterId", "value": "$CacheClusterId" }
+            ],
+            "period": "60"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 70, "color": "orange" },
+                { "value": 90, "color": "red" }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "type": "timeseries",
+        "title": "Memory Usage (%)",
+        "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 },
+        "datasource": "${DS_CLOUDWATCH}",
+        "targets": [
+          {
+            "refId": "A",
+            "metricName": "MemoryUsage",
+            "namespace": "AWS/MemoryDB",
+            "statistics": ["Average"],
+            "dimensions": [
+              { "name": "CacheClusterId", "value": "$CacheClusterId" }
+            ],
+            "period": "60"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 70, "color": "orange" },
+                { "value": 90, "color": "red" }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "type": "timeseries",
+        "title": "Network Throughput (Bytes/sec)",
+        "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+        "datasource": "${DS_CLOUDWATCH}",
+        "targets": [
+          {
+            "refId": "A",
+            "metricName": "NetworkRxBytes",
+            "namespace": "AWS/MemoryDB",
+            "statistics": ["Sum"],
+            "dimensions": [
+              { "name": "CacheClusterId", "value": "$CacheClusterId" }
+            ],
+            "period": "60"
+          },
+          {
+            "refId": "B",
+            "metricName": "NetworkTxBytes",
+            "namespace": "AWS/MemoryDB",
+            "statistics": ["Sum"],
+            "dimensions": [
+              { "name": "CacheClusterId", "value": "$CacheClusterId" }
+            ],
+            "period": "60"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "type": "timeseries",
+        "title": "Cache Hit Ratio (%)",
+        "gridPos": { "x": 0, "y": 24, "w": 24, "h": 8 },
+        "datasource": "${DS_CLOUDWATCH}",
+        "targets": [
+          {
+            "refId": "A",
+            "metricName": "CacheHitRate",
+            "namespace": "AWS/MemoryDB",
+            "statistics": ["Average"],
+            "dimensions": [
+              { "name": "CacheClusterId", "value": "$CacheClusterId" }
+            ],
+            "period": "60"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "red" },
+                { "value": 90, "color": "orange" },
+                { "value": 95, "color": "green" }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "type": "timeseries",
+        "title": "Current Connections",
+        "gridPos": { "x": 0, "y": 32, "w": 24, "h": 8 },
+        "datasource": "${DS_CLOUDWATCH}",
+        "targets": [
+          {
+            "refId": "A",
+            "metricName": "CurrConnections",
+            "namespace": "AWS/MemoryDB",
+            "statistics": ["Average"],
+            "dimensions": [
+              { "name": "CacheClusterId", "value": "$CacheClusterId" }
+            ],
+            "period": "60"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      }
+    ]
+  },
+  "overwrite": true
+}
