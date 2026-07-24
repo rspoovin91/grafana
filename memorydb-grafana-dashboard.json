@@ -13,8 +13,8 @@
           "type": "datasource",
           "name": "DS_CLOUDWATCH",
           "label": "CloudWatch Datasource",
-          "default": "${DS_CLOUDWATCH}",
-          "hide": 2,
+          "default": "",
+          "hide": 0,
           "refresh": 1,
           "options": []
         },
